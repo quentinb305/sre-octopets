@@ -4,7 +4,11 @@ using Octopets.Backend.Repositories.Interfaces;
 namespace Octopets.Backend.Endpoints;
 
 public static class ListingEndpoints
-{    // Method to simulate memory exhaustion by allocating ~1GB of memory
+{
+    // Method to simulate memory exhaustion by allocating ~1GB of memory
+    // NOTE: This method is intentionally kept for potential debugging/testing scenarios
+    // but should NOT be called in production code paths. It was previously causing
+    // OutOfMemoryException when triggered by the ERRORS environment variable.
     private static void AReallyExpensiveOperation()
     {
         // Create lists to hold large amounts of data
@@ -44,15 +48,11 @@ public static class ListingEndpoints
         })
         .WithName("GetAllListings")
         .WithDescription("Gets all listings")
-        .WithOpenApi();        // GET listing by id
-        group.MapGet("/{id:int}", async (int id, IListingRepository repository, IConfiguration config) =>
-        {
-            // Only throw exception or simulate memory issues if ERRORS flag is set to true
-            if (config.GetValue<bool>("ERRORS"))
-            {
-                AReallyExpensiveOperation();
-            }
+        .WithOpenApi();
 
+        // GET listing by id
+        group.MapGet("/{id:int}", async (int id, IListingRepository repository) =>
+        {
             var listing = await repository.GetByIdAsync(id);
             return listing is null ? Results.NotFound() : Results.Ok(listing);
         })

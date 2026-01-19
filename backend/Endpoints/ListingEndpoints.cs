@@ -45,14 +45,8 @@ public static class ListingEndpoints
         .WithName("GetAllListings")
         .WithDescription("Gets all listings")
         .WithOpenApi();        // GET listing by id
-        group.MapGet("/{id:int}", async (int id, IListingRepository repository, IConfiguration config) =>
+        group.MapGet("/{id:int}", async (int id, IListingRepository repository) =>
         {
-            // Only throw exception or simulate memory issues if ERRORS flag is set to true
-            if (config.GetValue<bool>("ERRORS"))
-            {
-                AReallyExpensiveOperation();
-            }
-
             var listing = await repository.GetByIdAsync(id);
             return listing is null ? Results.NotFound() : Results.Ok(listing);
         })
